@@ -22,7 +22,7 @@ export default function KeywordTable() {
           onChange={() => dispatch({ type: 'TOGGLE_KEYWORD', keywordId: id })}
           style={{
             width: 16, height: 16, cursor: 'pointer',
-            accentColor: '#6366f1',
+            accentColor: '#06b6d4',
           }}
         />
       ),
@@ -34,8 +34,8 @@ export default function KeywordTable() {
         <Tag style={{
           borderRadius: 6,
           border: 'none',
-          background: `rgba(99,102,241,${0.08 + record.weight * 0.25})`,
-          color: '#4338ca',
+          background: `rgba(6,182,212,${0.06 + record.weight * 0.2})`,
+          color: 'var(--text-accent)',
           fontWeight: 500,
           fontSize: `${13 + record.weight * 4}px`,
           padding: '2px 10px',
@@ -51,7 +51,7 @@ export default function KeywordTable() {
       align: 'center',
       sorter: (a, b) => a.count - b.count,
       render: (count: number) => (
-        <span style={{ color: '#64748b', fontWeight: 500 }}>{count}</span>
+        <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{count}</span>
       ),
     },
     {
@@ -64,19 +64,24 @@ export default function KeywordTable() {
           <div style={{
             flex: 1,
             height: 8,
-            background: '#f1f5f9',
+            background: 'var(--bg-hover)',
             borderRadius: 4,
             overflow: 'hidden',
           }}>
             <div style={{
               width: `${(w * 100).toFixed(0)}%`,
               height: '100%',
-              background: 'linear-gradient(90deg, #818cf8, #6366f1, #4f46e5)',
+              background: 'linear-gradient(90deg, #06b6d4, #22d3ee)',
               borderRadius: 4,
               transition: 'width 0.4s ease',
             }} />
           </div>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#6366f1', minWidth: 36 }}>
+          <span style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: 'var(--text-accent)',
+            minWidth: 36,
+          }}>
             {(w * 100).toFixed(0)}%
           </span>
         </div>

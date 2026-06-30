@@ -25,10 +25,10 @@ export default function TextPreview() {
       if (selectedWords.includes(part)) {
         return (
           <mark key={i} style={{
-            background: 'linear-gradient(180deg, rgba(99,102,241,0.25), rgba(124,58,237,0.15))',
-            padding: '2px 4px',
+            background: 'rgba(6,182,212,0.2)',
+            padding: '1px 4px',
             borderRadius: 3,
-            color: '#3730a3',
+            color: 'var(--text-accent)',
             fontWeight: 600,
           }}>
             {part}
@@ -46,16 +46,17 @@ export default function TextPreview() {
       maxHeight: 360,
       overflow: 'auto',
       padding: '20px 24px',
-      background: '#fafbfc',
-      borderRadius: 12,
-      border: '1px solid #e2e8f0',
+      background: 'var(--bg-input)',
+      borderRadius: 10,
+      border: '1px solid var(--border-default)',
+      fontFamily: '"JetBrains Mono", "Fira Code", monospace',
     }}>
       <Paragraph style={{
         whiteSpace: 'pre-wrap',
         margin: 0,
         lineHeight: 2.2,
-        fontSize: 14,
-        color: '#334155',
+        fontSize: 13,
+        color: 'var(--text-secondary)',
       }}>
         {highlightedText}
       </Paragraph>
