@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Typography, Button, Space, Spin, message, Card, List, Tag } from 'antd'
 import { ArrowLeftOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -14,6 +14,7 @@ const dbLabels: Record<string, string> = {
   espacenet: 'Espacenet (欧洲)',
   google: 'Google Patents',
 }
+const dbOrder: Record<string, number> = { cnipa: 0, espacenet: 1, google: 2 }
 
 export default function SearchQueryPage() {
   const navigate = useNavigate()
@@ -37,6 +38,21 @@ export default function SearchQueryPage() {
         .finally(() => setLoading(false))
     }
   }, [])
+
+  const sortedLinks = useMemo(() => {
+    const priorityMap = new Map(searchQueries.map(q => [q.id, q.priority || 99]))
+    return searchUrlResults
+      .flatMap(r =>
+        r.searchUrls.map(su => ({
+          key: `${r.queryId}-${su.database}`,
+          query: r.queryText,
+          priority: priorityMap.get(r.queryId) || 99,
+          dbSort: dbOrder[su.database] ?? 99,
+          ...su,
+        }))
+      )
+      .sort((a, b) => a.dbSort - b.dbSort || a.priority - b.priority)
+  }, [searchUrlResults, searchQueries])
 
   const handleSearch = async () => {
     setSearching(true)
@@ -94,7 +110,7 @@ export default function SearchQueryPage() {
             <Card className="glass-card" style={{ marginBottom: 24 }} title="检索链接">
               <List
                 size="small"
-                dataSource={searchUrlResults.flatMap(r => r.searchUrls.map(su => ({ key: `${r.queryId}-${su.database}`, query: r.queryText, ...su })))}
+                dataSource={sortedLinks}
                 renderItem={(item: { key: string; query: string; database: string; label: string; url: string }) => (
                   <List.Item>
                     <Space>

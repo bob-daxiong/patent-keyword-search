@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Typography, Button, Space, List, Tag, Card, Empty } from 'antd'
 import { ArrowLeftOutlined, ExportOutlined, FileTextOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
@@ -7,14 +8,34 @@ import type { PatentResult } from '../types'
 const { Title, Text, Paragraph } = Typography
 
 const dbColors: Record<string, string> = { cnipa: 'red', espacenet: 'blue', google: 'green' }
+const dbOrder: Record<string, number> = { cnipa: 0, espacenet: 1, google: 2 }
 
 export default function ResultsPage() {
   const navigate = useNavigate()
   const { state } = useAppState()
-  const { searchUrlResults } = state
+  const { searchUrlResults, searchQueries } = state
 
-  const flatUrls = searchUrlResults.flatMap(r =>
-    r.searchUrls.map(su => ({ key: `${r.queryId}-${su.database}`, query: r.queryText, ...su }))
+  const priorityMap = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const q of searchQueries) {
+      map.set(q.id, q.priority || 99)
+    }
+    return map
+  }, [searchQueries])
+
+  const flatUrls = useMemo(() =>
+    searchUrlResults
+      .flatMap(r =>
+        r.searchUrls.map(su => ({
+          key: `${r.queryId}-${su.database}`,
+          query: r.queryText,
+          priority: priorityMap.get(r.queryId) || 99,
+          dbSort: dbOrder[su.database] ?? 99,
+          ...su,
+        }))
+      )
+      .sort((a, b) => a.dbSort - b.dbSort || a.priority - b.priority),
+    [searchUrlResults, priorityMap]
   )
 
   const allPatentResults: (PatentResult & { queryText: string; source: string })[] = searchUrlResults.flatMap(r =>

@@ -146,7 +146,7 @@ export default function HistoryPage() {
                       </Space>
                     ),
                     children: (
-                      <Paragraph copyable>
+                      <Paragraph copyable={{ text: q.queryText }}>
                         <code style={{ fontSize: 12 }}>{q.queryText}</code>
                       </Paragraph>
                     ),

@@ -24,7 +24,7 @@ class IPCPredictor:
         keywords_lower = [kw.lower() for kw in keywords]
 
         for entry in self.ipc_entries:
-            desc = entry.get('description', '').lower()
+            desc = entry.get('desc', '').lower()
             score = 0
             for kw in keywords_lower:
                 if kw in desc:
@@ -37,7 +37,7 @@ class IPCPredictor:
             if score > 0:
                 scores.append({
                     'code': entry['code'],
-                    'description': entry.get('description', ''),
+                    'description': entry.get('desc', ''),
                     'score': round(score / len(keywords), 4)
                 })
 

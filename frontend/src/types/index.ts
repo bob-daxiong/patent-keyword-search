@@ -18,6 +18,7 @@ export interface SearchQuery {
   targetDbs: string[]
   ipcCodes: string[]
   editable: boolean
+  priority?: number
 }
 
 export interface PatentResult {
