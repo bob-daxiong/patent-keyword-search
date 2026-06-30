@@ -12,14 +12,17 @@ function AppShellInner() {
   const isDark = theme === 'dark'
 
   return (
-    <Layout style={{ minHeight: '100vh' }} hasSider>
+    <Layout style={{
+      minHeight: '100vh',
+      background: isDark ? '#09090f' : '#f8fafc',
+    }} hasSider>
       <Sidebar />
       <Layout style={{
         marginLeft: sidebarCollapsed ? 64 : 220,
         transition: 'margin-left 0.25s ease',
         background: isDark ? '#09090f' : '#f8fafc',
       }}>
-        <Content>
+        <Content style={{ padding: 0, minHeight: 'auto' }}>
           <Outlet />
         </Content>
       </Layout>
