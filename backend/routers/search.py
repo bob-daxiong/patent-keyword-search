@@ -37,12 +37,12 @@ async def generate_queries(request: QueryRequest):
 @router.post('/search')
 async def search_patents(request: SearchRequest):
     urls = _patent_search.build_search_urls(request.query_text, request.databases)
-    patent_results: list[dict] = []
+    patentResults: list[dict] = []
     if 'google' in request.databases:
-        patent_results = await _patent_search.fetch_google_patents_results(request.query_text)
+        patentResults = await _patent_search.fetch_google_patents_results(request.query_text)
     return {
-        'query_id': request.query_id,
-        'query_text': request.query_text,
-        'search_urls': urls,
-        'patent_results': patent_results
+        'queryId': request.query_id,
+        'queryText': request.query_text,
+        'searchUrls': urls,
+        'patentResults': patentResults
     }

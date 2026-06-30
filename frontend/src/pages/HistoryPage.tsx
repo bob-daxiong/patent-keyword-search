@@ -80,13 +80,13 @@ export default function HistoryPage() {
                   }
                   description={
                     <Space wrap size={[4, 6]}>
-                      {item.keywords.slice(0, 6).map((kw: Keyword) => (
+                      {(item.keywords || []).slice(0, 6).map((kw: Keyword) => (
                         <Tag key={kw.id} color="blue" style={{ borderRadius: 4 }}>{kw.word}</Tag>
                       ))}
-                      {item.keywords.length > 6 && <Tag style={{ borderRadius: 4 }}>+{item.keywords.length - 6}</Tag>}
-                      {item.searchUrlResults && (
+                      {(item.keywords || []).length > 6 && <Tag style={{ borderRadius: 4 }}>+{item.keywords.length - 6}</Tag>}
+                      {item.searchUrlResults && item.searchUrlResults.length > 0 && (
                         <Tag color="purple" style={{ borderRadius: 4 }}>
-                          {item.searchUrlResults.flatMap((r: SearchUrlResult) => r.searchUrls).length} 个检索链接
+                          {item.searchUrlResults.flatMap((r: SearchUrlResult) => r.searchUrls || []).length} 个检索链接
                         </Tag>
                       )}
                     </Space>
@@ -124,33 +124,37 @@ export default function HistoryPage() {
             )}
 
             <div style={{ marginBottom: 16 }}>
-              <Text strong style={{ display: 'block', marginBottom: 8 }}>关键词 ({detailItem.keywords.length}):</Text>
+              <Text strong style={{ display: 'block', marginBottom: 8 }}>关键词 ({(detailItem.keywords || []).length}):</Text>
               <Space wrap>
-                {detailItem.keywords.map((kw: Keyword) => (
+                {(detailItem.keywords || []).map((kw: Keyword) => (
                   <Tag key={kw.id} color="blue">{kw.word} ({(kw.weight * 100).toFixed(0)}%)</Tag>
                 ))}
               </Space>
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <Text strong style={{ display: 'block', marginBottom: 8 }}>检索式 ({detailItem.searchQueries.length}):</Text>
-              <Collapse
-                size="small"
-                items={detailItem.searchQueries.map((q: SearchQuery) => ({
-                  key: q.id,
-                  label: (
-                    <Space>
-                      <Tag color="orange">{q.strategy}</Tag>
-                      <Text style={{ fontSize: 12 }}>{q.queryText.substring(0, 40)}...</Text>
-                    </Space>
-                  ),
-                  children: (
-                    <Paragraph copyable>
-                      <code style={{ fontSize: 12 }}>{q.queryText}</code>
-                    </Paragraph>
-                  ),
-                }))}
-              />
+              <Text strong style={{ display: 'block', marginBottom: 8 }}>检索式 ({(detailItem.searchQueries || []).length}):</Text>
+              {(detailItem.searchQueries && detailItem.searchQueries.length > 0) ? (
+                <Collapse
+                  size="small"
+                  items={detailItem.searchQueries.map((q: SearchQuery) => ({
+                    key: q.id,
+                    label: (
+                      <Space>
+                        <Tag color="orange">{q.strategy}</Tag>
+                        <Text style={{ fontSize: 12 }}>{q.queryText.substring(0, 40)}...</Text>
+                      </Space>
+                    ),
+                    children: (
+                      <Paragraph copyable>
+                        <code style={{ fontSize: 12 }}>{q.queryText}</code>
+                      </Paragraph>
+                    ),
+                  }))}
+                />
+              ) : (
+                <Text type="secondary" style={{ fontSize: 12 }}>暂无检索式数据</Text>
+              )}
             </div>
 
             {detailItem.searchUrlResults && detailItem.searchUrlResults.length > 0 && (
@@ -183,7 +187,7 @@ export default function HistoryPage() {
                 <List
                   size="small"
                   dataSource={detailItem.searchUrlResults.flatMap((r: SearchUrlResult) =>
-                    r.searchUrls.map(su => ({ key: su.database, query: r.queryText, ...su }))
+                    (r.searchUrls || []).map(su => ({ key: su.database, query: r.queryText || '', ...su }))
                   )}
                   renderItem={(item: { key: string; query: string; database: string; label: string; url: string }) => (
                     <List.Item>
