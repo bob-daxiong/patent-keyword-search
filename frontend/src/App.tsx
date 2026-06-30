@@ -16,7 +16,7 @@ function getAntdConfig(mode: 'dark' | 'light') {
     token: {
       colorPrimary: '#06b6d4',
       borderRadius: 8,
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fontFamily: '"Microsoft YaHei", "微软雅黑", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       fontSize: 14,
       controlHeight: 36,
       colorBgContainer: isDark ? '#141425' : '#ffffff',

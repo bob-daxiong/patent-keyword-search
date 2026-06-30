@@ -132,7 +132,7 @@ export default function ResultsPage() {
                       code
                       ellipsis
                       style={{
-                        fontSize: 12,
+                        fontSize: 14,
                         fontFamily: 'monospace',
                         flex: 1,
                         background: 'var(--bg-input)',

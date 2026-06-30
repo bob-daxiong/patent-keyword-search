@@ -153,7 +153,7 @@ export default function SearchQueryPage() {
                     <Tag color={dbColors[item.database]}>{dbLabels[item.database] || item.label}</Tag>
                     <Text
                       code
-                      style={{ fontSize: 12, maxWidth: 360, fontFamily: 'monospace' }}
+                      style={{ fontSize: 14, maxWidth: 420, fontFamily: 'monospace' }}
                       ellipsis
                     >
                       {item.query}

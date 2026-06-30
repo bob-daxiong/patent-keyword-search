@@ -234,7 +234,7 @@ export default function SearchQueryEditor({ onSearchQuery }: SearchQueryEditorPr
                       }}
                     >
                       <code style={{
-                        fontSize: 13,
+                        fontSize: 15,
                         color: 'var(--text-primary)',
                         fontFamily: '"JetBrains Mono", "Fira Code", monospace',
                       }}>
@@ -250,7 +250,7 @@ export default function SearchQueryEditor({ onSearchQuery }: SearchQueryEditorPr
                           value={getQueryText(q)}
                           onChange={(e) => handleEdit(q.id, e.target.value)}
                           placeholder="编辑检索式..."
-                          style={{ flex: 1, fontSize: 13, fontFamily: 'monospace', borderRadius: 8 }}
+                          style={{ flex: 1, fontSize: 14, fontFamily: 'monospace', borderRadius: 8 }}
                         />
                       )}
                       {onSearchQuery && (
