@@ -19,8 +19,7 @@ echo   Installing PyInstaller...
 pip install pyinstaller
 if errorlevel 1 (
     echo [ERROR] pip install failed - check Python/pip
-    pause
-    exit /b 1
+    goto end
 )
 
 echo.
@@ -35,22 +34,19 @@ if exist "frontend\dist\index.html" (
     call npm install
     if errorlevel 1 (
         echo [ERROR] npm install failed - check Node.js
-        pause
-        exit /b 1
+        goto end
     )
     call npm run build
     if errorlevel 1 (
         echo [ERROR] npm run build failed
-        pause
-        exit /b 1
+        goto end
     )
     cd /d "%~dp0"
 )
 
 if not exist "frontend\dist\index.html" (
     echo [ERROR] frontend/dist/index.html not found
-    pause
-    exit /b 1
+    goto end
 )
 
 echo.
@@ -77,4 +73,5 @@ if exist "dist\PatentKeywordSearch.exe" (
     echo.
 )
 
+:end
 pause
