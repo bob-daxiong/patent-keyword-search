@@ -1,14 +1,23 @@
-import { useMemo } from 'react'
+import { useMemo, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { ConfigProvider, theme as antdTheme } from 'antd'
+import { ConfigProvider, theme as antdTheme, Spin } from 'antd'
 import { ThemeProvider, useTheme } from './components/ThemeProvider'
 import { AppProvider } from './store/AppContext'
 import AppShell from './components/AppShell'
 import ErrorBoundary from './components/ErrorBoundary'
-import HomePage from './pages/HomePage'
-import SearchQueryPage from './pages/SearchQueryPage'
-import ResultsPage from './pages/ResultsPage'
-import HistoryPage from './pages/HistoryPage'
+
+const HomePage = lazy(() => import('./pages/HomePage'))
+const SearchQueryPage = lazy(() => import('./pages/SearchQueryPage'))
+const ResultsPage = lazy(() => import('./pages/ResultsPage'))
+const HistoryPage = lazy(() => import('./pages/HistoryPage'))
+
+function PageLoader() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+      <Spin size="large" />
+    </div>
+  )
+}
 
 function getAntdConfig(mode: 'dark' | 'light') {
   const isDark = mode === 'dark'
@@ -101,6 +110,7 @@ function AppContent() {
       <BrowserRouter>
         <AppProvider>
           <ErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route element={<AppShell />}>
                 <Route path="/" element={<HomePage />} />
@@ -109,6 +119,7 @@ function AppContent() {
                 <Route path="/history" element={<HistoryPage />} />
               </Route>
             </Routes>
+            </Suspense>
           </ErrorBoundary>
         </AppProvider>
       </BrowserRouter>
