@@ -1,0 +1,151 @@
+{
+  "keyword": {
+    "old": {
+      "label": "旧版 (单文档TF-IDF)",
+      "top_keywords": [
+        "方法",
+        "卷积",
+        "图像识别",
+        "通道",
+        "注意力",
+        "分离",
+        "深度",
+        "网络",
+        "步骤",
+        "权利"
+      ],
+      "coverage": 0.1,
+      "weight_cv": 0.222,
+      "hits": [
+        "图像识别"
+      ],
+      "top_weights": [
+        1.0,
+        0.901,
+        0.76,
+        0.658,
+        0.632,
+        0.596,
+        0.596,
+        0.555,
+        0.549,
+        0.54
+      ]
+    },
+    "new": {
+      "label": "新版 (TextRank+位置权重)",
+      "top_keywords": [
+        "方法",
+        "图像识别",
+        "卷积",
+        "通道",
+        "技术",
+        "特征提取",
+        "注意力",
+        "深度",
+        "分离",
+        "识别"
+      ],
+      "coverage": 0.2,
+      "weight_cv": 0.29,
+      "hits": [
+        "图像识别",
+        "特征提取"
+      ],
+      "top_weights": [
+        1.0,
+        0.695,
+        0.574,
+        0.557,
+        0.496,
+        0.484,
+        0.473,
+        0.462,
+        0.45,
+        0.436
+      ]
+    }
+  },
+  "ipc": {
+    "old": {
+      "label": "旧版 (子串匹配)",
+      "top_codes": [
+        "G06V10/82"
+      ],
+      "top_scores": [
+        0.2
+      ],
+      "top_descs": [
+        "神经网络用于图像识别"
+      ],
+      "domain_hits": 1,
+      "score_decay": 1.0,
+      "num_results": 1
+    },
+    "new": {
+      "label": "新版 (Jaccard相似度)",
+      "top_codes": [
+        "G06V10/82",
+        "G06F17/00",
+        "G06N3/00"
+      ],
+      "top_scores": [
+        0.0667,
+        0.0625,
+        0.0588
+      ],
+      "top_descs": [
+        "神经网络用于图像识别",
+        "数字计算设备或数据处理设备",
+        "基于生物模型的计算设备"
+      ],
+      "domain_hits": 3,
+      "score_decay": 1.13,
+      "num_results": 3
+    }
+  },
+  "query": {
+    "old": {
+      "label": "旧版 (无权重区分)",
+      "total_queries": 27,
+      "unique_strategies": 9,
+      "priority_distribution": {
+        "1": 6,
+        "2": 6,
+        "3": 9,
+        "4": 3,
+        "5": 3
+      },
+      "min_query_len": 16,
+      "max_query_len": 112,
+      "avg_query_len": 47.1,
+      "p1_count": 6,
+      "p5_count": 3
+    },
+    "new": {
+      "label": "新版 (权重驱动)",
+      "total_queries": 12,
+      "unique_strategies": 7,
+      "priority_distribution": {
+        "1": 3,
+        "2": 1,
+        "3": 4,
+        "4": 2,
+        "5": 2
+      },
+      "min_query_len": 16,
+      "max_query_len": 115,
+      "avg_query_len": 41.8,
+      "p1_count": 3,
+      "p5_count": 2
+    }
+  },
+  "improvements": [
+    "关键词覆盖度提升: 0.1 -> 0.2",
+    "权重区分度提升: 0.222 -> 0.29",
+    "IPC领域命中: 旧=1/3, 新=3/3",
+    "IPC得分区分度提升: 1.0 -> 1.13",
+    "冗余查询减少: 27 -> 12"
+  ],
+  "score": "5/5"
+}

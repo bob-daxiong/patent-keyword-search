@@ -47,12 +47,17 @@ export async function generateWordCloud(keywords: Keyword[]): Promise<string> {
 
 export async function generateSearchQueries(
   text: string,
-  keywords: string[]
+  keywords: string[],
+  keywordWeights?: Map<string, number>
 ): Promise<{ ipc_predictions: IPCPrediction[]; queries: SearchQuery[] }> {
+  const keywordItems = keywords.map(kw => ({
+    word: kw,
+    weight: keywordWeights?.get(kw) ?? 1.0,
+  }))
   const res = await fetch(`${BASE}/search-queries`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, keywords }),
+    body: JSON.stringify({ text, keywords: keywordItems }),
   })
   return res.json()
 }

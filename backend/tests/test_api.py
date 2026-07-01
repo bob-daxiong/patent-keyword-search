@@ -36,7 +36,11 @@ class TestSearchEndpoints:
     def test_search_queries_with_keywords(self):
         response = client.post('/api/search-queries', json={
             'text': '深度学习神经网络图像识别',
-            'keywords': ['深度学习', '神经网络', '图像识别'],
+            'keywords': [
+                {'word': '深度学习', 'weight': 1.0},
+                {'word': '神经网络', 'weight': 0.8},
+                {'word': '图像识别', 'weight': 0.6},
+            ],
         })
         assert response.status_code == 200
         data = response.json()

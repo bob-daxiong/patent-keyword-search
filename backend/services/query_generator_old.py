@@ -1,10 +1,3 @@
-"""Query generator with keyword weight-driven strategy selection.
-
-High-weight keywords -> precision queries (IPC-first, core AND)
-Medium-weight keywords -> expansion queries (synonym, IPC)
-Low-weight keywords -> broad queries (OR, broad)
-"""
-
 import uuid
 
 from services.synonym_dict import get_synonyms
@@ -15,112 +8,21 @@ class QueryGenerator:
     def __init__(self, ipc_predictor=None):
         self.ipc_predictor = ipc_predictor
 
-    def generate(self, keyword_dicts: list[dict], ipc_codes: list[dict] | None = None) -> list[dict]:
-        if not keyword_dicts:
+    def generate(self, keywords: list[dict], ipc_codes: list[dict] | None = None) -> list[dict]:
+        if not keywords:
             return []
 
-        # Sort by weight descending and extract words with weights
-        sorted_kw = sorted(keyword_dicts, key=lambda k: k.get('weight', 1.0), reverse=True)
-
-        # Split into tiers based on weight
-        # Top tier (>0.5 weight): precision keywords for AND/IPC queries
-        # Mid tier (0.2-0.5): expansion keywords for synonym/OR queries
-        # Low tier (<0.2): broad keywords, used only in OR/broad queries
-        high_kw = [(k['word'], k.get('weight', 1.0)) for k in sorted_kw if k.get('weight', 1.0) >= 0.5]
-        mid_kw = [(k['word'], k.get('weight', 1.0)) for k in sorted_kw if 0.2 <= k.get('weight', 1.0) < 0.5]
-        low_kw = [(k['word'], k.get('weight', 1.0)) for k in sorted_kw if k.get('weight', 1.0) < 0.2]
-
-        # If no tiers (all same weight), use all as high
-        if not high_kw:
-            high_kw = [(k['word'], k.get('weight', 1.0)) for k in sorted_kw]
-
-        high_words = [w for w, _ in high_kw]
-        mid_words = [w for w, _ in mid_kw]
-        low_words = [w for w, _ in low_kw]
-        all_words = [k['word'] for k in sorted_kw]
-
+        keyword_words = [k['word'] for k in keywords]
         queries: list[dict] = []
 
-        # P1: IPC-first - uses only highest weight keywords
-        queries.extend(self._generate_ipc_first_queries(high_words[:4], ipc_codes))
-
-        # P2: Synonym expansion - uses high + mid keywords
-        synonym_input = high_words[:3] + mid_words[:2]
-        if len(synonym_input) < 2:
-            synonym_input = high_words[:5]
-        queries.extend(self._generate_synonym_queries(synonym_input, ipc_codes))
-
-        # P3: Core AND - uses high weight keywords only
-        queries.extend(self._generate_core_queries(high_words[:5], ipc_codes))
-
-        # P3: IPC-limited - uses high weight keywords
-        queries.extend(self._generate_ipc_queries(high_words[:3], ipc_codes))
-
-        # P4: OR expansion - uses all keywords (high + mid + low)
-        or_input = high_words + mid_words + low_words
-        if len(or_input) < 3:
-            or_input = all_words
-        queries.extend(self._generate_or_queries(or_input, ipc_codes))
-
-        # P5: Broad - uses top 2 high-weight keywords
-        queries.extend(self._generate_broad_queries(high_words[:2], ipc_codes))
-
-        # Deduplicate near-identical queries (Jaccard similarity on token sets)
-        queries = self._deduplicate(queries)
-
-        # Truncate long queries
-        queries = [self._truncate_if_needed(q) for q in queries]
+        queries.extend(self._generate_ipc_first_queries(keyword_words, ipc_codes))
+        queries.extend(self._generate_synonym_queries(keyword_words, ipc_codes))
+        queries.extend(self._generate_core_queries(keyword_words, ipc_codes))
+        queries.extend(self._generate_ipc_queries(keyword_words, ipc_codes))
+        queries.extend(self._generate_or_queries(keyword_words, ipc_codes))
+        queries.extend(self._generate_broad_queries(keyword_words, ipc_codes))
 
         return queries
-
-    def _deduplicate(self, queries: list[dict]) -> list[dict]:
-        """Remove queries with Jaccard similarity > 0.85 on token sets."""
-        if len(queries) <= 1:
-            return queries
-
-        def tokenize(q: dict) -> set[str]:
-            text = q.get('queryText', '')
-            return set(text.replace('(', ' ').replace(')', ' ').replace('"', ' ').split())
-
-        kept = []
-        for q in queries:
-            q_tokens = tokenize(q)
-            is_dup = False
-            for k in kept:
-                k_tokens = tokenize(k)
-                if not q_tokens or not k_tokens:
-                    continue
-                jaccard = len(q_tokens & k_tokens) / len(q_tokens | k_tokens)
-                if jaccard > 0.85:
-                    is_dup = True
-                    break
-            if not is_dup:
-                kept.append(q)
-
-        return kept
-
-    def _truncate_if_needed(self, query: dict) -> dict:
-        """Truncate query text if it exceeds database-specific limits."""
-        text = query.get('queryText', '')
-        db = query.get('targetDbs', ['cnipa'])[0] if query.get('targetDbs') else 'cnipa'
-
-        limits = {'google': 2000, 'espacenet': 2000, 'cnipa': 1000}
-        max_len = limits.get(db, 1000)
-
-        if len(text) > max_len:
-            # Try to truncate at a word boundary
-            truncated = text[:max_len]
-            last_space = truncated.rfind(' ')
-            last_paren = truncated.rfind(')')
-            if last_paren > max_len * 0.8:
-                truncated = text[:last_paren + 1]
-            elif last_space > max_len * 0.8:
-                truncated = text[:last_space]
-            else:
-                truncated = text[:max_len]
-            query['queryText'] = truncated
-
-        return query
 
     def _generate_ipc_first_queries(
         self, keywords: list[str], ipc_codes: list[dict] | None
@@ -136,19 +38,27 @@ class QueryGenerator:
             base_code = ipc['code']
             broad_code = self._get_broad_ipc(base_code)
 
-            for db_name in self._get_db_formats():
-                fmt = self._get_db_formats()[db_name]
+            for db_name, fmt in self._get_db_formats().items():
                 if db_name == 'google':
                     kw_part = ' '.join(f'"{t}"' for t in top_words)
-                    ipc_prefix = f'{base_code} OR {broad_code}' if (broad_code and broad_code != base_code) else base_code
+                    if broad_code and broad_code != base_code:
+                        ipc_prefix = f'{base_code} OR {broad_code}'
+                    else:
+                        ipc_prefix = base_code
                     query_text = f'{ipc_prefix} {kw_part}'
                 elif db_name == 'espacenet':
                     kw_part = '(' + ' AND '.join(top_words) + ')'
-                    ipc_prefix = f'({base_code} OR {broad_code})' if (broad_code and broad_code != base_code) else base_code
+                    if broad_code and broad_code != base_code:
+                        ipc_prefix = f'({base_code} OR {broad_code})'
+                    else:
+                        ipc_prefix = base_code
                     query_text = f'{ipc_prefix} AND {kw_part}'
                 else:
                     kw_part = '(' + ') AND ('.join(top_words) + ')'
-                    ipc_prefix = f'({base_code} OR {broad_code})' if (broad_code and broad_code != base_code) else base_code
+                    if broad_code and broad_code != base_code:
+                        ipc_prefix = f'({base_code} OR {broad_code})'
+                    else:
+                        ipc_prefix = base_code
                     query_text = f'{ipc_prefix} AND ({kw_part})'
 
                 broad_label = f'/{broad_code}' if broad_code else ''
@@ -163,8 +73,7 @@ class QueryGenerator:
                 })
 
             narrow_words = top_words[:2]
-            for db_name in self._get_db_formats():
-                fmt = self._get_db_formats()[db_name]
+            for db_name, fmt in self._get_db_formats().items():
                 if db_name == 'google':
                     kw_part = ' '.join(f'"{t}"' for t in narrow_words)
                     query_text = f'{ipc["code"]} {kw_part}'
@@ -205,8 +114,7 @@ class QueryGenerator:
         if len(groups) < 2:
             return []
 
-        for db_name in self._get_db_formats():
-            fmt = self._get_db_formats()[db_name]
+        for db_name, fmt in self._get_db_formats().items():
             or_terms = []
             for _, group in groups:
                 if len(group) >= 2:
@@ -214,10 +122,35 @@ class QueryGenerator:
                 else:
                     or_terms.append(f'"{group[0]}"' if db_name == 'google' else group[0])
 
-            combined = fmt['and'](or_terms)
+            combined = fmt['and'](or_terms) if db_name == 'google' else fmt['and'](or_terms)
             queries.append({
                 'id': str(uuid.uuid4()),
                 'strategy': f'同义词扩展 ({len(groups)}词组)',
+                'queryText': combined,
+                'targetDbs': [db_name],
+                'ipcCodes': [ipc['code'] for ipc in (ipc_codes or [])[:3]],
+                'editable': True,
+                'priority': 2,
+            })
+
+        for db_name, fmt in self._get_db_formats().items():
+            top3 = keywords[:3]
+            syn_groups = []
+            for kw in top3:
+                syns = get_synonyms(kw, max_count=2)
+                syn_groups.append([kw] + syns[:1])
+
+            or_exprs = []
+            for g in syn_groups:
+                if len(g) >= 2:
+                    or_exprs.append(fmt['or'](g))
+                else:
+                    or_exprs.append(f'"{g[0]}"' if db_name == 'google' else g[0])
+
+            combined = fmt['and'](or_exprs)
+            queries.append({
+                'id': str(uuid.uuid4()),
+                'strategy': f'同义词扩展 (核心3词)',
                 'queryText': combined,
                 'targetDbs': [db_name],
                 'ipcCodes': [ipc['code'] for ipc in (ipc_codes or [])[:3]],
@@ -234,8 +167,7 @@ class QueryGenerator:
         top3 = keywords[:3]
         top5 = keywords[:5] if len(keywords) >= 5 else keywords
 
-        for db_name in self._get_db_formats():
-            fmt = self._get_db_formats()[db_name]
+        for db_name, fmt in self._get_db_formats().items():
             if len(top3) >= 3:
                 queries.append({
                     'id': str(uuid.uuid4()),
@@ -271,8 +203,7 @@ class QueryGenerator:
         group2 = keywords[half:half * 2] if len(keywords) >= half * 2 else keywords[half:]
 
         queries = []
-        for db_name in self._get_db_formats():
-            fmt = self._get_db_formats()[db_name]
+        for db_name, fmt in self._get_db_formats().items():
             or1 = fmt['or'](group1)
             or2 = fmt['or'](group2)
             combined = fmt['and']([or1, or2]) if or2 else or1
@@ -297,8 +228,7 @@ class QueryGenerator:
 
         top2 = keywords[:2]
         queries = []
-        for db_name in self._get_db_formats():
-            fmt = self._get_db_formats()[db_name]
+        for db_name, fmt in self._get_db_formats().items():
             queries.append({
                 'id': str(uuid.uuid4()),
                 'strategy': '宽泛检索 (2核心词)',
@@ -320,8 +250,7 @@ class QueryGenerator:
         queries = []
         top_words = keywords[:3]
         for ipc in ipc_codes[:2]:
-            for db_name in self._get_db_formats():
-                fmt = self._get_db_formats()[db_name]
+            for db_name, fmt in self._get_db_formats().items():
                 kw_part = fmt['and'](top_words)
                 if db_name == 'google':
                     ipc_query = f'{ipc["code"]} {kw_part}'
@@ -344,21 +273,11 @@ class QueryGenerator:
 
     @staticmethod
     def _get_broad_ipc(code: str) -> str | None:
-        """Get broader IPC by stepping up one hierarchy level.
-
-        Example: G06N3/08 -> G06N3/00 -> G06N
-        If code has subgroup (/XX), step to main group (/00).
-        Otherwise, truncate to subclass (first 4 chars).
-        """
+        """获取上位 IPC，如 G06N3/08 -> G06N"""
         if '/' in code:
-            section, subgroup = code.split('/', 1)
-            # If it's already a main group (/00), go up to subclass
-            if subgroup == '00' and len(section) >= 4:
-                return section[:4]
-            # Step up to the main group
-            if subgroup != '00':
-                return f'{section}/00'
-            return section[:4] if len(section) >= 4 else section
+            section = code.split('/')[0]
+            if len(section) >= 4:
+                return section[:4] if len(section) > 4 else section
         if len(code) >= 4:
             return code[:4]
         return None

@@ -25,7 +25,12 @@ export default function SearchQueryPage() {
     if (selectedKeywords.length === 0 && keywords.length > 0) { navigate('/'); return }
     if (selectedKeywords.length > 0 && searchQueries.length === 0) {
       setLoading(true)
-      generateSearchQueries(textContent, selectedKeywords)
+      // Build weight map from stored keywords
+      const weightMap = new Map<string, number>()
+      for (const kw of keywords) {
+        weightMap.set(kw.word, kw.weight)
+      }
+      generateSearchQueries(textContent, selectedKeywords, weightMap)
         .then((result) => {
           dispatch({ type: 'SET_IPC_PREDICTIONS', predictions: result.ipc_predictions || [] })
           dispatch({ type: 'SET_SEARCH_QUERIES', queries: result.queries || [] })
