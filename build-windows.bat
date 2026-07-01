@@ -24,21 +24,28 @@ if errorlevel 1 (
 )
 
 echo.
-echo (2/3) Building frontend...
-cd /d "%~dp0frontend"
-call npm install
-if errorlevel 1 (
-    echo [ERROR] npm install failed - check Node.js
-    pause
-    exit /b 1
+echo (2/3) Preparing frontend...
+if exist "frontend\dist\index.html" (
+    echo   Using pre-built frontend (skip npm build).
+) else (
+    echo   Pre-built frontend not found, building from source...
+    echo   (This requires Node.js 20+. If it fails, upgrade Node.js
+    echo    from https://nodejs.org or use a pre-built dist folder.)
+    cd /d "%~dp0frontend"
+    call npm install
+    if errorlevel 1 (
+        echo [ERROR] npm install failed - check Node.js
+        pause
+        exit /b 1
+    )
+    call npm run build
+    if errorlevel 1 (
+        echo [ERROR] npm run build failed
+        pause
+        exit /b 1
+    )
+    cd /d "%~dp0"
 )
-call npm run build
-if errorlevel 1 (
-    echo [ERROR] npm run build failed
-    pause
-    exit /b 1
-)
-cd /d "%~dp0"
 
 if not exist "frontend\dist\index.html" (
     echo [ERROR] frontend/dist/index.html not found
