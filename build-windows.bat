@@ -9,8 +9,14 @@ echo ============================================
 echo.
 
 echo (1/3) Installing Python dependencies...
-pip install "setuptools<70" --quiet
-pip install -r "backend\requirements.txt" pyinstaller
+echo   Fixing setuptools for jieba compatibility...
+pip install "setuptools==69.5.1"
+echo   Installing project dependencies (except jieba)...
+pip install fastapi==0.115.0 "uvicorn[standard]==0.30.6" python-multipart==0.0.12 python-docx==1.1.2 wordcloud==1.9.3 matplotlib==3.9.2 numpy==1.26.4
+echo   Installing jieba (needs compatible setuptools)...
+pip install --no-build-isolation jieba
+echo   Installing PyInstaller...
+pip install pyinstaller
 if errorlevel 1 (
     echo [ERROR] pip install failed - check Python/pip
     pause
