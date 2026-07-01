@@ -28,8 +28,8 @@ if exist "frontend\dist\index.html" (
     echo   Using pre-built frontend (skip npm build).
 ) else (
     echo   Pre-built frontend not found, building from source...
-    echo   (This requires Node.js 20+. If it fails, upgrade Node.js
-    echo    from https://nodejs.org or use a pre-built dist folder.)
+    echo   This requires Node.js 20+. If it fails, upgrade Node.js
+    echo   from https://nodejs.org or use a pre-built dist folder.
     cd /d "%~dp0frontend"
     call npm install
     if errorlevel 1 (
