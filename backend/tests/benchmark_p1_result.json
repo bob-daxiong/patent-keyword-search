@@ -1,0 +1,38 @@
+{
+  "stopwords_fix": {
+    "test": "停用词修复：技术动作词不再被过滤",
+    "before": {
+      "tech_words_found": [
+        "提高",
+        "降低",
+        "改善",
+        "增强"
+      ],
+      "count": 4
+    },
+    "after": {
+      "tech_words_found": [
+        "提高",
+        "降低",
+        "优化"
+      ],
+      "count": 3
+    },
+    "improvement": "4 -> 3 (+-1)",
+    "boilerplate_filtered_old": [],
+    "boilerplate_filtered_new": []
+  },
+  "ipc_coverage": {
+    "test": "IPC覆盖度：10个技术领域对比",
+    "before": {
+      "total_results": 48,
+      "domain_coverage": "10/10"
+    },
+    "after": {
+      "total_results": 47,
+      "domain_coverage": "10/10"
+    },
+    "improvement": "48 -> 47 (+-1条结果, +0个领域覆盖)"
+  },
+  "improvements": []
+}
