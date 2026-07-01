@@ -55,7 +55,7 @@ if not exist "frontend\dist\index.html" (
 echo/
 echo (3/3) Packaging into single exe...
 cd /d "%~dp0"
-pyinstaller --onefile --name PatentKeywordSearch --add-data "backend\data;data" --add-data "frontend\dist;frontend\dist" --hidden-import jieba.finalseg --hidden-import jieba.posseg --hidden-import jieba.analyse --hidden-import matplotlib.backends.backend_agg --collect-all jieba --collect-all wordcloud --clean backend\main.py
+pyinstaller --onefile --name PatentKeywordSearch --add-data "backend\data;data" --add-data "frontend\dist;frontend\dist" --hidden-import jieba.finalseg --hidden-import jieba.posseg --hidden-import jieba.analyse --hidden-import matplotlib.backends.backend_agg --collect-all jieba --collect-all wordcloud --collect-all matplotlib --clean backend\main.py
 
 if exist "dist\PatentKeywordSearch.exe" (
     echo/
