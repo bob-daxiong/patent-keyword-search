@@ -1,21 +1,14 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Typography, Button, Spin, message, Card, List, Tag, Progress } from 'antd'
-import { ArrowLeftOutlined, ThunderboltOutlined } from '@ant-design/icons'
+import { ThunderboltOutlined } from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAppState } from '../store/AppContext'
 import { generateSearchQueries, openPatentSearch } from '../api'
 import PageContainer from '../components/PageContainer'
 import SearchQueryEditor from '../components/SearchQueryEditor'
+import { DB_COLORS, DB_LABELS, DB_ORDER } from '../constants/databases'
 
 const { Text } = Typography
-
-const dbColors: Record<string, string> = { cnipa: 'red', espacenet: 'blue', google: 'green' }
-const dbLabels: Record<string, string> = {
-  cnipa: '中国专利公布公告',
-  espacenet: 'Espacenet (欧洲)',
-  google: 'Google Patents',
-}
-const dbOrder: Record<string, number> = { cnipa: 0, espacenet: 1, google: 2 }
 
 export default function SearchQueryPage() {
   const navigate = useNavigate()
@@ -50,7 +43,7 @@ export default function SearchQueryPage() {
           key: `${r.queryId}-${su.database}`,
           query: r.queryText,
           priority: priorityMap.get(r.queryId) || 99,
-          dbSort: dbOrder[su.database] ?? 99,
+          dbSort: DB_ORDER[su.database] ?? 99,
           ...su,
         }))
       )
@@ -63,20 +56,27 @@ export default function SearchQueryPage() {
     dispatch({ type: 'SET_SEARCH_STATUS', status: 'searching' })
     setSearchProgress(0)
 
-    const allUrls = []
+    const allUrls: Awaited<ReturnType<typeof openPatentSearch>>[] = []
     const total = searchQueries.length
 
-    for (let i = 0; i < total; i++) {
-      const q = searchQueries[i]
+    const tasks = searchQueries.map((q) => {
       const queryText = editedQueries.get(q.id) ?? q.queryText
-      try {
-        const result = await openPatentSearch(q.id, queryText, q.targetDbs)
-        allUrls.push(result)
-        dispatch({ type: 'ADD_SEARCH_URL_RESULT', result })
-      } catch (e: unknown) {
-        message.error(e instanceof Error ? e.message : '检索请求失败')
+      return openPatentSearch(q.id, queryText, q.targetDbs)
+    })
+
+    const results = await Promise.allSettled(tasks)
+
+    let completed = 0
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i]
+      if (result.status === 'fulfilled') {
+        allUrls.push(result.value)
+        dispatch({ type: 'ADD_SEARCH_URL_RESULT', result: result.value })
+      } else {
+        message.error(result.reason instanceof Error ? result.reason.message : '检索请求失败')
       }
-      setSearchProgress(Math.round(((i + 1) / total) * 100))
+      completed++
+      setSearchProgress(Math.round((completed / total) * 100))
     }
 
     dispatch({ type: 'SET_SEARCH_STATUS', status: 'done' })
@@ -150,7 +150,7 @@ export default function SearchQueryPage() {
                 dataSource={sortedLinks}
                 renderItem={(item) => (
                   <List.Item>
-                    <Tag color={dbColors[item.database]}>{dbLabels[item.database] || item.label}</Tag>
+                    <Tag color={DB_COLORS[item.database]}>{DB_LABELS[item.database] || item.label}</Tag>
                     <Text
                       code
                       style={{ fontSize: 14, maxWidth: 420, fontFamily: 'monospace' }}

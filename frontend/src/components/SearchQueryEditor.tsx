@@ -9,11 +9,9 @@ import {
 } from '@ant-design/icons'
 import { useAppState } from '../store/AppContext'
 import type { SearchQuery } from '../types'
+import { DB_COLORS, DB_LABELS } from '../constants/databases'
 
 const { Text, Paragraph } = Typography
-
-const dbColors: Record<string, string> = { cnipa: 'red', espacenet: 'blue', google: 'green' }
-const dbLabels: Record<string, string> = { cnipa: '中国专利', espacenet: '欧洲专利', google: 'Google Patents' }
 
 const strategyLabels: Record<string, string> = {
   ipc_first: 'IPC 优先',
@@ -211,10 +209,10 @@ export default function SearchQueryEditor({ onSearchQuery }: SearchQueryEditorPr
                         <Tag
                           key={db}
                           icon={<DatabaseOutlined />}
-                          color={dbColors[db]}
+                          color={DB_COLORS[db]}
                           style={{ borderRadius: 6 }}
                         >
-                          {dbLabels[db] || db}
+                          {DB_LABELS[db] || db}
                         </Tag>
                       ))}
                       {q.ipcCodes.length > 0 && (

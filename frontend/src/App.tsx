@@ -1,8 +1,10 @@
+import { useMemo } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ConfigProvider, theme as antdTheme } from 'antd'
 import { ThemeProvider, useTheme } from './components/ThemeProvider'
 import { AppProvider } from './store/AppContext'
 import AppShell from './components/AppShell'
+import ErrorBoundary from './components/ErrorBoundary'
 import HomePage from './pages/HomePage'
 import SearchQueryPage from './pages/SearchQueryPage'
 import ResultsPage from './pages/ResultsPage'
@@ -92,19 +94,22 @@ function getAntdConfig(mode: 'dark' | 'light') {
 
 function AppContent() {
   const { theme } = useTheme()
+  const antdConfig = useMemo(() => getAntdConfig(theme), [theme])
 
   return (
-    <ConfigProvider theme={getAntdConfig(theme)}>
+    <ConfigProvider theme={antdConfig}>
       <BrowserRouter>
         <AppProvider>
-          <Routes>
-            <Route element={<AppShell />}>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/search-query" element={<SearchQueryPage />} />
-              <Route path="/results" element={<ResultsPage />} />
-              <Route path="/history" element={<HistoryPage />} />
-            </Route>
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route element={<AppShell />}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/search-query" element={<SearchQueryPage />} />
+                <Route path="/results" element={<ResultsPage />} />
+                <Route path="/history" element={<HistoryPage />} />
+              </Route>
+            </Routes>
+          </ErrorBoundary>
         </AppProvider>
       </BrowserRouter>
     </ConfigProvider>

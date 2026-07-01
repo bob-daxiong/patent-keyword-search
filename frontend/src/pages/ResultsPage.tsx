@@ -5,16 +5,9 @@ import { useNavigate } from 'react-router-dom'
 import { useAppState } from '../store/AppContext'
 import PageContainer from '../components/PageContainer'
 import type { PatentResult } from '../types'
+import { DB_COLORS, DB_LABELS, DB_ORDER } from '../constants/databases'
 
 const { Text } = Typography
-
-const dbColors: Record<string, string> = { cnipa: 'red', espacenet: 'blue', google: 'green' }
-const dbLabels: Record<string, string> = {
-  cnipa: '中国专利公布公告',
-  espacenet: 'Espacenet',
-  google: 'Google Patents',
-}
-const dbOrder: Record<string, number> = { cnipa: 0, espacenet: 1, google: 2 }
 
 export default function ResultsPage() {
   const navigate = useNavigate()
@@ -35,7 +28,7 @@ export default function ResultsPage() {
           key: `${r.queryId}-${su.database}`,
           query: r.queryText,
           priority: priorityMap.get(r.queryId) || 99,
-          dbSort: dbOrder[su.database] ?? 99,
+          dbSort: DB_ORDER[su.database] ?? 99,
           ...su,
         }))
       )
@@ -67,13 +60,13 @@ export default function ResultsPage() {
     >
       {/* Search Links by Database */}
       {Object.entries(groupedByDb).length > 0 ? (
-        Object.entries(groupedByDb).sort(([a], [b]) => (dbOrder[a] ?? 99) - (dbOrder[b] ?? 99)).map(([db, items]) => (
+        Object.entries(groupedByDb).sort(([a], [b]) => (DB_ORDER[a] ?? 99) - (DB_ORDER[b] ?? 99)).map(([db, items]) => (
           <Card
             key={db}
             title={
               <Space>
-                <Tag color={dbColors[db]} style={{ fontWeight: 600 }}>
-                  {dbLabels[db] || db}
+                <Tag color={DB_COLORS[db]} style={{ fontWeight: 600 }}>
+                  {DB_LABELS[db] || db}
                 </Tag>
                 <Text style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
                   ({items.length} 条)
@@ -221,9 +214,9 @@ export default function ResultsPage() {
                   }
                   description={
                     <Space size={[12, 4]} wrap>
-                      {item.assignee && (
+                      {item.applicant && (
                         <Text style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                          申请人: {item.assignee}
+                          申请人: {item.applicant}
                         </Text>
                       )}
                       {item.filingDate && (

@@ -36,52 +36,61 @@ export default function UploadPanel() {
   }
 
   return (
-    <Dragger
-      {...props}
-      disabled={uploading}
-      style={{
-        background: isDark
-          ? 'linear-gradient(135deg, rgba(6,182,212,0.03), rgba(34,211,238,0.02))'
-          : 'linear-gradient(135deg, rgba(6,182,212,0.02), rgba(8,145,178,0.01))',
-        border: `2px dashed ${isDark ? 'rgba(6,182,212,0.25)' : 'rgba(6,182,212,0.30)'}`,
-        borderRadius: 16,
-        padding: '40px 24px',
-        transition: 'all 0.3s ease',
+    <div
+      onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+        const el = e.currentTarget.querySelector('.ant-upload-drag') as HTMLElement | null
+        if (el) {
+          el.style.borderColor = 'rgba(6,182,212,0.5)'
+          el.style.boxShadow = '0 0 30px rgba(6,182,212,0.08)'
+        }
       }}
-      onMouseEnter={e => {
-        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(6,182,212,0.5)'
-        ;(e.currentTarget as HTMLElement).style.boxShadow = '0 0 30px rgba(6,182,212,0.08)'
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLElement).style.borderColor = isDark ? 'rgba(6,182,212,0.25)' : 'rgba(6,182,212,0.30)'
-        ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
+      onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+        const el = e.currentTarget.querySelector('.ant-upload-drag') as HTMLElement | null
+        if (el) {
+          el.style.borderColor = isDark ? 'rgba(6,182,212,0.25)' : 'rgba(6,182,212,0.30)'
+          el.style.boxShadow = 'none'
+        }
       }}
     >
-      <div style={{
-        width: 72,
-        height: 72,
-        borderRadius: '50%',
-        background: isDark
-          ? 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(34,211,238,0.08))'
-          : 'linear-gradient(135deg, rgba(6,182,212,0.10), rgba(8,145,178,0.05))',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 20px',
-      }}>
-        <InboxOutlined style={{ fontSize: 32, color: '#22d3ee' }} />
-      </div>
-      <p style={{
-        fontSize: 16,
-        fontWeight: 600,
-        color: 'var(--text-primary)',
-        marginBottom: 8,
-      }}>
-        点击或拖拽交底书文件到此区域上传
-      </p>
-      <p style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
-        支持 .docx 格式，文件大小不超过 20MB
-      </p>
-    </Dragger>
+      <Dragger
+        {...props}
+        disabled={uploading}
+        style={{
+          background: isDark
+            ? 'linear-gradient(135deg, rgba(6,182,212,0.03), rgba(34,211,238,0.02))'
+            : 'linear-gradient(135deg, rgba(6,182,212,0.02), rgba(8,145,178,0.01))',
+          border: `2px dashed ${isDark ? 'rgba(6,182,212,0.25)' : 'rgba(6,182,212,0.30)'}`,
+          borderRadius: 16,
+          padding: '40px 24px',
+          transition: 'all 0.3s ease',
+        }}
+      >
+        <div style={{
+          width: 72,
+          height: 72,
+          borderRadius: '50%',
+          background: isDark
+            ? 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(34,211,238,0.08))'
+            : 'linear-gradient(135deg, rgba(6,182,212,0.10), rgba(8,145,178,0.05))',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 20px',
+        }}>
+          <InboxOutlined style={{ fontSize: 32, color: '#22d3ee' }} />
+        </div>
+        <p style={{
+          fontSize: 16,
+          fontWeight: 600,
+          color: 'var(--text-primary)',
+          marginBottom: 8,
+        }}>
+          点击或拖拽交底书文件到此区域上传
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
+          支持 .docx 格式，文件大小不超过 20MB
+        </p>
+      </Dragger>
+    </div>
   )
 }

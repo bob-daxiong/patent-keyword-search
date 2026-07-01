@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Typography, Button, List, Tag, Popconfirm, Empty, Space, Card, Modal, Collapse } from 'antd'
 import { DeleteOutlined, EyeOutlined, HistoryOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
 import PageContainer from '../components/PageContainer'
 import type { SearchHistoryItem, Keyword, SearchQuery, IPCPrediction, SearchUrlResult } from '../types'
+import { DB_COLORS } from '../constants/databases'
 
 const { Text, Paragraph } = Typography
 
 const STORAGE_KEY = 'patent_search_history'
-const dbColors: Record<string, string> = { cnipa: 'red', espacenet: 'blue', google: 'green' }
 
 export default function HistoryPage() {
-  const navigate = useNavigate()
   const [history, setHistory] = useState<SearchHistoryItem[]>([])
   const [detailItem, setDetailItem] = useState<SearchHistoryItem | null>(null)
 
@@ -268,7 +266,7 @@ export default function HistoryPage() {
                     renderItem={(linkItem) => (
                       <List.Item>
                         <Space>
-                          <Tag color={dbColors[linkItem.database]}>{linkItem.label}</Tag>
+                          <Tag color={DB_COLORS[linkItem.database]}>{linkItem.label}</Tag>
                           <Text
                             code
                             ellipsis

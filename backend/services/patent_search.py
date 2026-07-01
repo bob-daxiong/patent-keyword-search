@@ -22,7 +22,7 @@ class PatentSearchAdapter:
         elif db == 'espacenet':
             return f'https://worldwide.espacenet.com/patent/search?q={encoded}'
         elif db == 'cnipa':
-            return f'http://pss-system.cponline.cnipa.gov.cn/conventionalSearch'
+            return f'https://pss-system.cponline.cnipa.gov.cn/conventionalSearch?search={encoded}'
         return ''
 
     def _get_label(self, db: str) -> str:
@@ -34,13 +34,9 @@ class PatentSearchAdapter:
         return labels.get(db, db)
 
     async def fetch_google_patents_results(self, query_text: str, max_results: int = 15) -> list[dict]:
-        encoded = quote(query_text, safe='')
-        url = f'https://patents.google.com/?q={encoded}&language=ZH'
-        return [{
-            'title': f'Google Patents 检索: {query_text[:60]}{"..." if len(query_text) > 60 else ""}',
-            'patentNumber': '',
-            'abstract': 'Google Patents 屏蔽了自动化抓取，请点击右侧"查看原文"按钮在新标签中查看完整检索结果。',
-            'applicant': '',
-            'filingDate': '',
-            'url': url,
-        }]
+        """
+        Google Patents blocks headless browser scraping.
+        Return empty list so the frontend displays a guidance message
+        instead of fake patent data.
+        """
+        return []

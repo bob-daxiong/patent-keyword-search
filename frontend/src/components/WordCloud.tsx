@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Spin, Empty } from 'antd'
+import { Empty } from 'antd'
 import { useAppState } from '../store/AppContext'
 import { generateWordCloud } from '../api'
 import { SkeletonCard } from './Skeleton'
